@@ -20,8 +20,7 @@ int calculateMedian(cv::Mat img)
         }
     }
     std::nth_element(array.begin(), array.begin() + array.size()/2, array.end());
-    
-    //std::cout << "Median: " << int(array[array.size()/2]) << std::endl;
+
     return int(array[array.size()/2]);
 }
 
@@ -29,7 +28,6 @@ int calculateMedian(cv::Mat img)
 void rotateImage(cv::Mat img, cv::Mat& rotated, double angle)
 {
     cv::Mat matRot = cv::getRotationMatrix2D( cv::Point(img.rows/2, img.cols/2), -angle, 1 );
-
     cv::warpAffine( img, rotated, matRot, img.size() );
 }
 
@@ -39,17 +37,8 @@ void shiftImage(cv::Mat img, cv::Mat& shifted, int x, int y)
     shifted = shifted.zeros(img.rows,img.cols,CV_8U);
     
     cv::Rect source = cv::Rect(max(0,-x),max(0,-y), img.cols-abs(x),img.rows-abs(y));
-
     cv::Rect target = cv::Rect(max(0,x),max(0,y),img.cols-abs(x),img.rows-abs(y));
     img(source).copyTo(shifted(target));
-    /*
-    for(int i = 0; i < (img.rows); i++)
-        for(int j = 0; j < (img.cols); j++)
-        {
-            if( i+y < img.rows && j+x < img.cols && i+y >= 0 && j+x >= 0)
-                shifted.at<uchar>((i+y),(j+x)) = img.at<uchar>(i,j);
-        }
-    */  
 }
 
 // OK, src & ref are bitmaps
@@ -57,7 +46,6 @@ int xorImages(cv::Mat src, cv::Mat ref, cv::Mat& diff)
 {
     diff = diff.zeros(src.rows,src.cols,CV_8U);
     int counter = 0;
-  
     cv::absdiff(src,ref,diff);
     counter = cv::countNonZero(diff);
     return counter;
@@ -67,22 +55,7 @@ int xorImages(cv::Mat src, cv::Mat ref, cv::Mat& diff)
 void toBitmap(cv::Mat gray, cv::Mat& bitmap, int median)
 {
     bitmap = bitmap.zeros(gray.rows,gray.cols,CV_8U);
-
     threshold( gray, bitmap, median, 255, CV_THRESH_BINARY );
-
-    /*for(int i = 0; i < gray.rows; i++)
-        for(int j = 0; j < gray.cols; j++)
-        {
-            if ( gray.at<uchar>(i,j) > median )
-            {
-                bitmap.at<uchar>(i,j) = 255;
-            }
-            else
-            {
-                bitmap.at<uchar>(i,j) = 0;
-            }
-        }
-     */
 }
 
 //OK
@@ -192,12 +165,10 @@ void mtb(cv::Mat src, cv::Mat ref, int& x, int& y, double& angle)
             tx = 2*tx;
             ty = 2*ty;
             error = checkLocalPixels(srcPyramid[i], refPyramid[i], tx, ty);
-            //std::cout << tx << "," << ty << "   " << error << std::endl;
         }
         
         if ( error < minerror)
         {
-            //std::cout << tx << "," << ty << "   " << error << std::endl;
             minerror = error;
             angle = rotangle;
             x = tx;
@@ -205,20 +176,6 @@ void mtb(cv::Mat src, cv::Mat ref, int& x, int& y, double& angle)
         }   
     }
 }
-
-// OK
-void AlignToRef(cv::Mat ref, std::vector<cv::Mat> images)
-{
-    int x = 0;
-    int y = 0;
-    double angle = 0;
-    for (int i = 0; i < images.size(); i++)
-    {
-        mtb(images[i], ref, x, y, angle);
-        std::cout << "Image " << i << " x: " << x << " y: " << y << " angle: " << angle << std::endl;
-    }
-}
-
 
 int main(int argc, char** argv) {
     cv::Mat src, ref;
